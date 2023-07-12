@@ -24,36 +24,26 @@ if __name__ == '__main__':
     # total clients array
     clients = []
 
+    subset_indices = None
+    n_clients = conf["num_models"]
+
     if conf["data_distribution"] == 'iid':
-        n_clients = conf["num_models"]
-        data_len = len(train_datasets)
-        subset_indices = distribution.split_iid(n_clients, data_len)
-        for idx in subset_indices:
-            subset_dataset = Subset(train_datasets, idx)
-            clients.append(Client(batch_size=conf["batch_size"],
-                                  lr=conf["lr"],
-                                  momentum=conf["momentum"],
-                                  model_parameter=conf["model_parameter"],
-                                  local_epochs=conf["local_epochs"],
-                                  model=server.global_model,
-                                  train_dataset=subset_dataset))
+        subset_indices = distribution.split_iid(n_clients, len(train_datasets))
 
     elif conf["data_distribution"] == 'dirichlet':
-        n_clients = conf["num_models"]
         dirichlet_alpha = conf["dirichlet_alpha"]
         train_labels = train_datasets.targets
-        # return an array: every client's index
-        client_idcs = distribution.dirichlet_split_noniid(train_labels, alpha=dirichlet_alpha, n_clients=n_clients)
+        subset_indices = distribution.dirichlet_split_noniid(train_labels, alpha=dirichlet_alpha, n_clients=n_clients)
 
-        for c, subset_indices in enumerate(client_idcs):
-            subset_dataset = Subset(train_datasets, subset_indices)
-            clients.append(Client(batch_size=conf["batch_size"],
-                                  lr=conf["lr"],
-                                  momentum=conf["momentum"],
-                                  model_parameter=conf["model_parameter"],
-                                  local_epochs=conf["local_epochs"],
-                                  model=server.global_model,
-                                  train_dataset=subset_dataset))
+    for idx in subset_indices:
+        subset_dataset = Subset(train_datasets, idx)
+        clients.append(Client(batch_size=conf["batch_size"],
+                              lr=conf["lr"],
+                              momentum=conf["momentum"],
+                              model_parameter=conf["model_parameter"],
+                              local_epochs=conf["local_epochs"],
+                              model=server.global_model,
+                              train_dataset=subset_dataset))
 
     accuracy = []
     losses = []
