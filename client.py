@@ -7,11 +7,11 @@ class Client(object):
 
 	def __init__(
 		self,
-		batch_size,
-		lr,
-		momentum,
-		model_parameter,
-		local_epochs,
+		batch_size: int,
+		lr: float,
+		momentum: float,
+		model_parameter: str,
+		local_epochs: int,
 		model,
 		train_dataset,
 	) -> None:

@@ -6,16 +6,15 @@ class Server(Model):
 	
 	def __init__(
 		self,
-		model_name,
-		batch_size,
-		lamda,
+		model_name: str,
+		batch_size: int,
 		eval_dataset
 	):
 		super().__init__(model_name, eval_dataset)
 		self.global_model = self.model
-		self.lamda = lamda
 		self.eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=batch_size, shuffle=True)
 
+	@staticmethod
 	def model_aggregation(self, clients_diff):
 
 		weight_accumulator = {}
@@ -27,7 +26,7 @@ class Server(Model):
 				weight_accumulator[name].add_(params)
 
 		for name, params in weight_accumulator.items():
-			update_per_layer = params * self.lamda
+			update_per_layer = params * len(clients_diff)
 
 			if params.type() != update_per_layer.type():
 				params.add_(update_per_layer.to(torch.int64))

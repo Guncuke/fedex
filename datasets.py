@@ -27,7 +27,7 @@ def get_dataset(dir_name, name):
 		train_dataset = datasets.FashionMNIST(dir_name, train=True, download=False, transform=transform_train)
 		eval_dataset = datasets.FashionMNIST(dir_name, train=False, download=False, transform=transform_test)
 
-	elif name == 'cifar':
+	elif name == 'cifar10':
 		transform_train = transforms.Compose([
 			transforms.RandomCrop(32, padding=4),
 			transforms.RandomHorizontalFlip(),
