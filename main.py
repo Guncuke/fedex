@@ -16,9 +16,9 @@ if __name__ == '__main__':
         tab2_col1, tab2_col2, tab2_col3 = st.columns(3)
         dataset = tab2_col1.selectbox("dataset", ["mnist", "fmnist", "cifar10", "custom_dataset"])
         data_distribution = tab2_col2.selectbox("data_distribution",
-                                                ["iid", "dirichlet(non-iid)", "custom_distribution"])
+                                                ["iid", "dirichlet", "custom_distribution"])
         dirichlet_alpha = tab2_col3.empty()
-        if data_distribution == "dirichlet(non-iid)":
+        if data_distribution == "dirichlet":
             dirichlet_alpha = tab2_col3.number_input("dirichlet parameter", min_value=0.0, value=0.5)
 
     with tab3:
@@ -46,12 +46,4 @@ if __name__ == '__main__':
                             model_parameter=model_parameter,
                             local_epochs=local_epoch)
 
-    # 创建一个数组作为参数
-    data = np.random.randn(100).cumsum()
 
-    # 设置x轴和y轴
-    x_values = np.arange(len(data))
-    y_values = data
-
-    # 将数组作为参数传递给line_chart函数，并指定x轴和y轴
-    st.line_chart(x=x_values, y=y_values)

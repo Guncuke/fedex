@@ -41,6 +41,9 @@ class Controller(object):
             train_labels = train_datasets.targets
             subset_indices = distribution.dirichlet_split_noniid(train_labels, alpha=dirichlet_alpha,
                                                                  n_clients=n_clients)
+        else:
+            # write yourself func in distribution.py
+            subset_indices = distribution.split_iid(n_clients, len(train_datasets))
 
         for idx in subset_indices:
             subset_dataset = Subset(train_datasets, idx)
