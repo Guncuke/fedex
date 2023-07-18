@@ -15,7 +15,7 @@ class Server(Model):
 		self.eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=batch_size, shuffle=True)
 
 	@staticmethod
-	def model_aggregation(self, clients_diff):
+	def model_aggregation(clients_diff):
 
 		weight_accumulator = {}
 		for name, params in clients_diff[0].items():

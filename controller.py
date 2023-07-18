@@ -30,7 +30,6 @@ class Controller(object):
         # total clients array
         self.clients = []
 
-        subset_indices = None
         n_clients = num_client
 
         if data_distribution == 'iid':
