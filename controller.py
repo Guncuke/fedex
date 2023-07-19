@@ -5,6 +5,7 @@ import datasets
 import random
 import distribution
 from typing import Optional
+import streamlit as st
 
 
 class Controller(object):
@@ -76,5 +77,3 @@ class Controller(object):
         self.losses.append(loss)
 
         print(f"acc: {acc:f}, loss: {loss:f}\n")
-
-        return acc, loss

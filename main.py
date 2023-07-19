@@ -48,8 +48,17 @@ if __name__ == '__main__':
                                 model_parameter=model_parameter,
                                 local_epochs=local_epoch)
 
+        progress_text = "Operation in progress. Please wait."
+        my_bar = st.progress(0.0, text=progress_text)
+        bar_split = 1.0 / global_epoch
+
         for e in range(global_epoch):
-            acc, loss = controller.run(k)
+            my_bar.progress(e*bar_split, text=progress_text)
+            controller.run(k)
+            if e == global_epoch-1:
+                my_bar.progress(e + 1, text="training finish.")
+                st.line_chart({"accuracy": controller.accuracy}, x="accuracy")
+
 
     train_button = st.button("start", use_container_width=True)
     if train_button:
