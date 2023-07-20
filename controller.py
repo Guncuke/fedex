@@ -20,12 +20,14 @@ class Controller(object):
                  momentum: float,
                  model_parameter: str,
                  local_epochs: int,
+                 aggr_rule: str
                  ):
 
         train_datasets, eval_datasets = datasets.get_dataset("./data/", dataset)
         self.server = Server(batch_size=batch_size,
                              model_name=model_name,
-                             eval_dataset=eval_datasets)
+                             eval_dataset=eval_datasets,
+                             aggr_rule=aggr_rule)
 
         # total clients array
         self.clients = []
@@ -64,12 +66,14 @@ class Controller(object):
 
         # clients_weight recode the diffs of every client
         clients_weight = []
+        clients_data_len = []
 
         for _, c in enumerate(candidates):
-            diff = c.local_train()
+            diff, data_len = c.local_train()
             clients_weight.append(diff)
+            clients_data_len.append(data_len)
 
-        self.server.model_aggregation(clients_diff=clients_weight)
+        self.server.model_update(clients_weight, clients_data_len)
 
         acc, loss = self.server.model_eval()
         self.accuracy.append(acc)

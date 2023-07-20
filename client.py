@@ -71,4 +71,4 @@ class Client(object):
 		for name, param in pre_model.items():
 			self.local_model.state_dict()[name] = param
 
-		return diff
+		return diff, len(self.train_dataset)

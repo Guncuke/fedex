@@ -1,8 +1,6 @@
 from controller import Controller
 import streamlit as st
 
-
-
 if __name__ == '__main__':
 
     def run():
@@ -15,22 +13,24 @@ if __name__ == '__main__':
                                 lr=lr,
                                 momentum=momentum,
                                 model_parameter=model_parameter,
-                                local_epochs=local_epoch)
+                                local_epochs=local_epoch,
+                                aggr_rule=aggregation)
 
         progress_text = "Operation in progress. Please wait."
         my_bar = st.progress(0.0, text=progress_text)
         bar_split = 1.0 / global_epoch
 
         for e in range(global_epoch):
-            my_bar.progress(e*bar_split, text=progress_text)
+            my_bar.progress(e * bar_split, text=progress_text)
             controller.run(k)
-            if e == global_epoch-1:
+            if e == global_epoch - 1:
                 my_bar.progress(1.0, text="training finish.")
                 st.success('finish!', icon="✅")
-        
+
         acc = controller.accuracy.copy()
         loss = controller.losses.copy()
         return acc, loss
+
 
     st.title("🌋 Fedex")
 
@@ -51,7 +51,8 @@ if __name__ == '__main__':
         else:
             st.session_state.enable = False
 
-        dirichlet_alpha = tab2_col3.number_input("dirichlet parameter", min_value=0.0, value=0.5, disabled=st.session_state.enable)
+        dirichlet_alpha = tab2_col3.number_input("dirichlet parameter", min_value=0.0, value=0.5,
+                                                 disabled=st.session_state.enable)
 
     with tab3:
         tab3_col1, tab3_col2, tab3_col3 = st.columns(3)
@@ -84,14 +85,19 @@ if __name__ == '__main__':
     if 'loss' not in st.session_state:
         st.session_state.loss = []
 
-    train_button = st.button("start", disabled=st.session_state.training, use_container_width=True, on_click=lambda: (setattr(st.session_state, "button_click", True), setattr(st.session_state, "training", True)))
+    train_button = st.button("start", disabled=st.session_state.training, use_container_width=True, on_click=lambda: (
+        setattr(st.session_state, "button_click", True), setattr(st.session_state, "training", True)))
 
     if train_button:
         with st.spinner("model is training......"):
-                st.session_state.acc, st.session_state.loss = run()
-                st.session_state.training = False
+            st.session_state.acc, st.session_state.loss = run()
+            st.session_state.training = False
 
     if st.session_state.button_click:
-        st.line_chart({"acc": st.session_state.acc})
-        st.line_chart({"loss": st.session_state.loss})
-
+        tab5, tab6, tab7 = st.tabs(["accuracy", "loss", "data distribution"])
+        with tab5:
+            st.line_chart({"acc": st.session_state.acc})
+        with tab6:
+            st.line_chart({"loss": st.session_state.loss})
+        with tab7:
+            "还没做"
