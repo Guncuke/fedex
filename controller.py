@@ -3,7 +3,7 @@ from server import Server
 from client import Client
 import datasets
 import random
-import distribution
+from utils import distribution
 from typing import Optional
 
 
