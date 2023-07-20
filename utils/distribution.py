@@ -23,6 +23,8 @@ def dirichlet_split_noniid(train_labels, alpha, n_clients):
     return client_idcs
 
 
+# TODO
+# 感觉这里不太对，应该按数据集划分的，按一个一个标签，平均分到每一个客户端
 def split_iid(n_clients, data_len):
     client_data_len = data_len // n_clients
     clients_idx = [[y for y in range(x * client_data_len, (x + 1) * client_data_len)] for x in range(n_clients)]

@@ -25,7 +25,7 @@ class Server(Model):
 		"""
 		clients_num = len(clients_diff)
 		weight_accumulator = {}
-		for name, params in clients_diff[0].items():
+		for name, params in clients_diff[-1].items():
 			weight_accumulator[name] = torch.zeros_like(params)
 
 		for _, client_diff in enumerate(clients_diff):

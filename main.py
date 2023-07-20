@@ -1,5 +1,6 @@
 from controller import Controller
 import streamlit as st
+import pandas as pd
 
 if __name__ == '__main__':
 
@@ -29,7 +30,8 @@ if __name__ == '__main__':
 
         acc = controller.accuracy.copy()
         loss = controller.losses.copy()
-        return acc, loss
+        data_distribute = controller.data_distribute.copy()
+        return acc, loss, data_distribute
 
 
     st.title("🌋 Fedex")
@@ -85,19 +87,23 @@ if __name__ == '__main__':
     if 'loss' not in st.session_state:
         st.session_state.loss = []
 
+    if 'data_distribute' not in st.session_state:
+        st.session_state.data_distribute = []
+
     train_button = st.button("start", disabled=st.session_state.training, use_container_width=True, on_click=lambda: (
         setattr(st.session_state, "button_click", True), setattr(st.session_state, "training", True)))
 
     if train_button:
         with st.spinner("model is training......"):
-            st.session_state.acc, st.session_state.loss = run()
+            st.session_state.acc, st.session_state.loss, st.session_state.data_distribute = run()
             st.session_state.training = False
 
     if st.session_state.button_click:
         tab5, tab6, tab7 = st.tabs(["accuracy", "loss", "data distribution"])
         with tab5:
-            st.line_chart({"acc": st.session_state.acc})
+            st.line_chart(pd.DataFrame(st.session_state.acc, columns=['accuracy']))
         with tab6:
-            st.line_chart({"loss": st.session_state.loss})
+            st.line_chart(pd.DataFrame(st.session_state.loss, columns=['loss']))
         with tab7:
-            "还没做"
+            st.bar_chart(pd.DataFrame(st.session_state.data_distribute,
+                                      columns=[f"{i}" for i in range(len(st.session_state.data_distribute[-1]))]))

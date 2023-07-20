@@ -1,3 +1,4 @@
+import torch
 from torch.utils.data import Subset
 from server import Server
 from client import Client
@@ -32,19 +33,22 @@ class Controller(object):
         # total clients array
         self.clients = []
 
-        n_clients = num_client
-
         if data_distribution == 'iid':
-            subset_indices = distribution.split_iid(n_clients, len(train_datasets))
+            subset_indices = distribution.split_iid(num_client, len(train_datasets))
 
         elif data_distribution == 'dirichlet':
-            dirichlet_alpha = dirichlet_alpha
-            train_labels = train_datasets.targets
-            subset_indices = distribution.dirichlet_split_noniid(train_labels, alpha=dirichlet_alpha,
-                                                                 n_clients=n_clients)
+            subset_indices = distribution.dirichlet_split_noniid(train_datasets.targets, alpha=dirichlet_alpha,
+                                                                 n_clients=num_client)
         else:
             # write yourself func in distribution.py
-            subset_indices = distribution.split_iid(n_clients, len(train_datasets))
+            subset_indices = distribution.split_iid(num_client, len(train_datasets))
+
+        # self.data_distribution : to draw the data distribution graph
+        n_classes = train_datasets.targets.max()+1
+        self.data_distribute = [[0]*n_classes for i in range(num_client)]
+        for i, indices in enumerate(subset_indices):
+            for j in indices:
+                self.data_distribute[i][train_datasets.targets[j]] += 1
 
         for idx in subset_indices:
             subset_dataset = Subset(train_datasets, idx)
