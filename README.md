@@ -1,7 +1,7 @@
 # fedex
  a simple federate-learning framework write by python
 
-
+![fedex](D:\迅雷下载\LICEcap\fedex.gif)
 
 ## 1. Client
 
