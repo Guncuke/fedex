@@ -1,3 +1,4 @@
 streamlit==1.23.1
 torch==1.13.1
 torchvision==0.14.1
+pandas==1.2.4
