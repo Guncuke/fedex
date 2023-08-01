@@ -146,13 +146,19 @@ if __name__ == '__main__':
         if 'training' not in st.session_state:
             st.session_state.training = False
 
+        if 'picture_result' not in st.session_state:
+            st.session_state.picture_result = None
+
+
         def dlg_run():
             st.session_state.training = True
             tdlg = dlg(images)
-            for i in range(30):
-                dummy_images = tdlg.run()
-                for dummy_image in dummy_images:
-                    placeholder.image(dummy_image,use_column_width='always')
+            with st.spinner("running...")
+                for i in range(30):
+                    dummy_images = tdlg.run()
+                    for dummy_image in dummy_images:
+                        placeholder.image(dummy_image,use_column_width='always')
+            st.session_state.picture_result = dummy_image
             st.session_state.training = False
 
 
@@ -175,7 +181,10 @@ if __name__ == '__main__':
                     image_transform = tf(image)
                     image_show = image_transform.permute(1, 2, 0)
                     col[i].image(image_show.numpy(), caption=f'origin images {i}', use_column_width='always')
+
         with st.container():
             st.subheader('Output origin images')
-            placeholder=st.empty()
+            placeholder = st.empty()
+            if st.session_state.picture_result is not None:
+                placeholder.image(st.session_state.picture_result, use_column_width='always')
 
