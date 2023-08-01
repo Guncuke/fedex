@@ -174,4 +174,8 @@ if __name__ == '__main__':
                     image = Image.open(image)
                     image_transform = tf(image)
                     image_show = image_transform.permute(1, 2, 0)
-                    col[i].image(image_show.numpy(), caption=f'origin images {i}', use_column_width='auto')
+                    col[i].image(image_show.numpy(), caption=f'origin images {i}', use_column_width='always')
+        with st.container():
+            st.subheader('Output origin images')
+            placeholder=st.empty()
+
