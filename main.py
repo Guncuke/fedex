@@ -151,12 +151,22 @@ if __name__ == '__main__':
         if 'class_result' not in st.session_state:
             st.session_state.class_result = None
 
+        if 'init_images' not in st.session_state:
+            st.session_state.init_images = None
+
+        if 'gt_images' not in st.session_state:
+            st.session_state.gt_images = []
 
         def dlg_run():
             st.session_state.training = True
             tdlg = Dlg(images, image_class)
+            # TODO: 列表
+            gt_image.image(st.session_state.gt_images[0], use_column_width='always')
             for i in range(30):
                 dummy_images, dummy_labels = tdlg.run()
+                if i == 0:
+                    st.session_state.init_images = dummy_images
+                    init_image.image(st.session_state.init_images[0], use_column_width='always')
                 for dummy_image, dummy_label in zip(dummy_images, dummy_labels):
                     placeholder_image.image(dummy_image, use_column_width='always')
                     placeholder_text.subheader(f'The class of the image is: {dummy_label.argmax().item()}')
@@ -183,16 +193,20 @@ if __name__ == '__main__':
                 image = Image.open(image)
                 image_transform = tf(image)
                 image_show = image_transform.permute(1, 2, 0)
-                col[i].image(image_show.numpy(), caption=f'origin images {i}', use_column_width='always')
-
-            image_class = st.number_input("image class", min_value=0, max_value=99, value=8,
-                                          disabled=st.session_state.training)
+                st.session_state.gt_images.append(image_show.numpy())
+                col[i].image(image_show.numpy(), caption=f'origin images {i}', use_column_width='auto')
+                image_class = col[i].number_input(f"image{i} class:", min_value=0, max_value=99, value=8,
+                                                  disabled=st.session_state.training)
 
         st.subheader('Output origin images')
-        placeholder_image = st.empty()
+        col_process = st.columns(3)
+        init_image = col_process[0].empty()
+        gt_image = col_process[2].empty()
+        placeholder_image = col_process[1].empty()
         placeholder_text = st.empty()
         if st.session_state.picture_result is not None:
             placeholder_image.image(st.session_state.picture_result, use_column_width='always')
             placeholder_text.subheader(f'The class of the image is: {st.session_state.class_result.argmax().item()}')
-
+            gt_image.image(st.session_state.gt_images[0], use_column_width='always')
+            init_image.image(st.session_state.init_images[0], use_column_width='always')
 
