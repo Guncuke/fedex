@@ -153,7 +153,7 @@ if __name__ == '__main__':
         def dlg_run():
             st.session_state.training = True
             tdlg = dlg(images)
-            with st.spinner("running...")
+            with st.spinner("running..."):
                 for i in range(30):
                     dummy_images = tdlg.run()
                     for dummy_image in dummy_images:
