@@ -153,38 +153,38 @@ if __name__ == '__main__':
         def dlg_run():
             st.session_state.training = True
             tdlg = dlg(images)
-            with st.spinner("running..."):
-                for i in range(30):
-                    dummy_images = tdlg.run()
-                    for dummy_image in dummy_images:
-                        placeholder.image(dummy_image,use_column_width='always')
+            for i in range(30):
+                dummy_images = tdlg.run()
+                for dummy_image in dummy_images:
+                    placeholder.image(dummy_image,use_column_width='always')
             st.session_state.picture_result = dummy_image
             st.session_state.training = False
 
+        st.subheader('Input origin images')
 
-        with st.container():
+        images = st.file_uploader("Choose images", accept_multiple_files=True, type=['png', 'jpg'], disabled=st.session_state.training)
+        train_button = st.button("start", disabled=st.session_state.training, use_container_width=True)
+        if images:
+            images_num = len(images)
+            col = st.columns(images_num)
+            tf = transforms.Compose([
+                transforms.Resize((32, 32)),
+                transforms.ToTensor(),
+            ])
 
-            st.subheader('Input origin images')
+            for i, image in enumerate(images):
+                image = Image.open(image)
+                image_transform = tf(image)
+                image_show = image_transform.permute(1, 2, 0)
+                col[i].image(image_show.numpy(), caption=f'origin images {i}', use_column_width='always')
 
-            images = st.file_uploader("Choose images", accept_multiple_files=True, type=['png', 'jpg'], disabled=st.session_state.training)
-            train_button = st.button("start", disabled=st.session_state.training, use_container_width=True, on_click=dlg_run)
-            if images:
-                images_num = len(images)
-                col = st.columns(images_num)
-                tf = transforms.Compose([
-                    transforms.Resize((32, 32)),
-                    transforms.ToTensor(),
-                ])
+        st.subheader('Output origin images')
+        placeholder = st.empty()
 
-                for i, image in enumerate(images):
-                    image = Image.open(image)
-                    image_transform = tf(image)
-                    image_show = image_transform.permute(1, 2, 0)
-                    col[i].image(image_show.numpy(), caption=f'origin images {i}', use_column_width='always')
+        if train_button:
+            with st.spinner('running...'):
+                dlg_run()
 
-        with st.container():
-            st.subheader('Output origin images')
-            placeholder = st.empty()
-            if st.session_state.picture_result is not None:
-                placeholder.image(st.session_state.picture_result, use_column_width='always')
+        if st.session_state.picture_result is not None:
+            placeholder.image(st.session_state.picture_result, use_column_width='always')
 
