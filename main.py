@@ -152,7 +152,7 @@ if __name__ == '__main__':
             for i in range(30):
                 dummy_images = tdlg.run()
                 for dummy_image in dummy_images:
-                    st.image(dummy_image)
+                    placeholder.image(dummy_image,use_column_width='always')
             st.session_state.training = False
 
 
