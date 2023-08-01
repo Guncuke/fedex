@@ -162,8 +162,10 @@ if __name__ == '__main__':
 
         st.subheader('Input origin images')
 
-        images = st.file_uploader("Choose images", accept_multiple_files=True, type=['png', 'jpg'], disabled=st.session_state.training)
-        train_button = st.button("start", disabled=st.session_state.training, use_container_width=True)
+        images = st.file_uploader("Choose images", accept_multiple_files=True, type=['png', 'jpg'],
+                                  disabled=st.session_state.training)
+        train_button = st.button("start", disabled=st.session_state.training, use_container_width=True,
+                                 on_click=dlg_run)
         if images:
             images_num = len(images)
             col = st.columns(images_num)
@@ -180,10 +182,6 @@ if __name__ == '__main__':
 
         st.subheader('Output origin images')
         placeholder = st.empty()
-
-        if train_button:
-            with st.spinner('running...'):
-                dlg_run()
 
         if st.session_state.picture_result is not None:
             placeholder.image(st.session_state.picture_result, use_column_width='always')
