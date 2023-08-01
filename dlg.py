@@ -7,8 +7,8 @@ from model import vision
 import torch.nn.functional as F
 
 
-class dlg():
-    def __init__(self, images):
+class Dlg:
+    def __init__(self, images, image_class):
 
         images_transform = []
         tf = transforms.Compose([
@@ -20,16 +20,15 @@ class dlg():
             images_transform.append(tf(image))
         self.images = torch.stack(images_transform)
 
-        self.dst = datasets.CIFAR100("~/.torch", download=True)
         self.tp = transforms.ToTensor()
         self.tt = transforms.ToPILImage()
         self.device = "cpu"
         if torch.cuda.is_available():
             self.device = "cuda"
-        self.index = 25
 
         self.gt_data = self.images.to(self.device)
-        gt_label = torch.Tensor([self.dst[self.index + i][1] for i in range(len(self.images))]).long().to(self.device)
+
+        gt_label = torch.Tensor([image_class]).long().to(self.device)
 
         gt_onehot_label = dlgUtils.label_to_onehot(gt_label)
 
@@ -61,6 +60,7 @@ class dlg():
 
                 grad_diff = 0
                 for gx, gy in zip(dummy_dy_dx, self.original_dy_dx):
+                    #grad_diff += (gx * gy).sum()/(torch.norm(gx) * torch.norm(gy))
                     grad_diff += ((gx - gy) ** 2).sum()
                 grad_diff.backward()
 
@@ -68,6 +68,6 @@ class dlg():
 
             self.optimizer.step(closure)
             current_loss = closure()
-            print(iters, "%.4f" % current_loss.item())
+            print(iters, "%.4f" % current_loss.item(), self.dummy_label.argmax().item())
 
-        return [tt(self.dummy_data[i].cpu()) for i in range(len(self.images))]
+        return [tt(self.dummy_data[i].cpu()) for i in range(len(self.images))], self.dummy_label

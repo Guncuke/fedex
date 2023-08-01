@@ -4,12 +4,9 @@ import pandas as pd
 import torch
 from torchvision import transforms
 from PIL import Image
-from dlg import dlg
+from dlg import Dlg
 
 if __name__ == '__main__':
-
-    
-
 
     st.title("🌋 Fedex")
     st.markdown("***")
@@ -49,7 +46,8 @@ if __name__ == '__main__':
             data_distribute = controller.data_distribute.copy()
 
             return acc, loss, data_distribute
-    
+
+
         tab1, tab2, tab3, tab4 = st.tabs(["Model setting", "Dataset setting", "Client setting", "Server setting"])
 
         with tab1:
@@ -68,7 +66,7 @@ if __name__ == '__main__':
                 st.session_state.enable = False
 
             dirichlet_alpha = tab2_col3.number_input("dirichlet parameter", min_value=0.0, value=0.5,
-                                                    disabled=st.session_state.enable)
+                                                     disabled=st.session_state.enable)
 
         with tab3:
             tab3_col1, tab3_col2, tab3_col3 = st.columns(3)
@@ -80,7 +78,7 @@ if __name__ == '__main__':
 
         with tab4:
             aggregation = st.selectbox("aggregation rule",
-                                    ["SimpleAvg", "FedAvg", "CustomRule"])
+                                       ["SimpleAvg", "FedAvg", "CustomRule"])
             global_epoch = st.slider("global epoch", min_value=1, value=20, step=1, max_value=500)
 
             if num_client == 1:
@@ -107,30 +105,31 @@ if __name__ == '__main__':
         if 'setting_record' not in st.session_state:
             st.session_state.setting_record = {}
 
-        train_button = st.button("start", disabled=st.session_state.training, use_container_width=True, on_click=lambda: (
-            setattr(st.session_state, "button_click", True), setattr(st.session_state, "training", True)))
+        train_button = st.button("start", disabled=st.session_state.training, use_container_width=True,
+                                 on_click=lambda: (
+                                     setattr(st.session_state, "button_click", True),
+                                     setattr(st.session_state, "training", True)))
 
         if train_button:
             with st.spinner("model is training......"):
                 st.session_state.acc, st.session_state.loss, st.session_state.data_distribute = run()
-                st.session_state.setting_record = {'dataset':dataset,
-                      'batch_size':batch_size,
-                      'model_name':model_name,
-                      'num_client':num_client,
-                      'data_distribution':data_distribution,
-                      'dirichlet_alpha':dirichlet_alpha,
-                      'lr':lr,
-                      'momentum':momentum,
-                      'model_parameter':model_parameter,
-                      'local_epochs':local_epoch,
-                      'aggr_rule':aggregation,
-                      'acc': st.session_state.acc,
-                      'loss': st.session_state.loss}
+                st.session_state.setting_record = {'dataset': dataset,
+                                                   'batch_size': batch_size,
+                                                   'model_name': model_name,
+                                                   'num_client': num_client,
+                                                   'data_distribution': data_distribution,
+                                                   'dirichlet_alpha': dirichlet_alpha,
+                                                   'lr': lr,
+                                                   'momentum': momentum,
+                                                   'model_parameter': model_parameter,
+                                                   'local_epochs': local_epoch,
+                                                   'aggr_rule': aggregation,
+                                                   'acc': st.session_state.acc,
+                                                   'loss': st.session_state.loss}
                 st.session_state.training = False
                 st.experimental_rerun()
 
         if st.session_state.button_click:
-            
             tab5, tab6, tab7 = st.tabs(["accuracy", "loss", "data distribution"])
             with tab5:
                 st.line_chart(pd.DataFrame(st.session_state.acc, columns=['accuracy']))
@@ -138,7 +137,7 @@ if __name__ == '__main__':
                 st.line_chart(pd.DataFrame(st.session_state.loss, columns=['loss']))
             with tab7:
                 st.bar_chart(pd.DataFrame(st.session_state.data_distribute,
-                                        columns=[f"{i}" for i in range(len(st.session_state.data_distribute[-1]))]))
+                                          columns=[f"{i}" for i in range(len(st.session_state.data_distribute[-1]))]))
             st.write(st.session_state.setting_record)
 
     elif option == 'Deep leakage from gradients':
@@ -149,16 +148,22 @@ if __name__ == '__main__':
         if 'picture_result' not in st.session_state:
             st.session_state.picture_result = None
 
+        if 'class_result' not in st.session_state:
+            st.session_state.class_result = None
+
 
         def dlg_run():
             st.session_state.training = True
-            tdlg = dlg(images)
+            tdlg = Dlg(images, image_class)
             for i in range(30):
-                dummy_images = tdlg.run()
-                for dummy_image in dummy_images:
-                    placeholder.image(dummy_image,use_column_width='always')
+                dummy_images, dummy_labels = tdlg.run()
+                for dummy_image, dummy_label in zip(dummy_images, dummy_labels):
+                    placeholder_image.image(dummy_image, use_column_width='always')
+                    placeholder_text.subheader(f'The class of the image is: {dummy_label.argmax().item()}')
             st.session_state.picture_result = dummy_image
+            st.session_state.class_result = dummy_label
             st.session_state.training = False
+
 
         st.subheader('Input origin images')
 
@@ -180,9 +185,14 @@ if __name__ == '__main__':
                 image_show = image_transform.permute(1, 2, 0)
                 col[i].image(image_show.numpy(), caption=f'origin images {i}', use_column_width='always')
 
-        st.subheader('Output origin images')
-        placeholder = st.empty()
+            image_class = st.number_input("image class", min_value=0, max_value=99, value=8,
+                                          disabled=st.session_state.training)
 
+        st.subheader('Output origin images')
+        placeholder_image = st.empty()
+        placeholder_text = st.empty()
         if st.session_state.picture_result is not None:
-            placeholder.image(st.session_state.picture_result, use_column_width='always')
+            placeholder_image.image(st.session_state.picture_result, use_column_width='always')
+            placeholder_text.subheader(f'The class of the image is: {st.session_state.class_result.argmax().item()}')
+
 
