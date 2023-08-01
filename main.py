@@ -4,6 +4,7 @@ import pandas as pd
 import torch
 from torchvision import transforms
 from PIL import Image
+from dlg import dlg
 
 if __name__ == '__main__':
 
@@ -147,7 +148,13 @@ if __name__ == '__main__':
 
         def dlg_run():
             st.session_state.training = True
-            
+            tdlg = dlg(images)
+            for i in range(30):
+                dummy_images = tdlg.run()
+                for dummy_image in dummy_images:
+                    st.image(dummy_image)
+            st.session_state.training = False
+
 
         with st.container():
 
@@ -168,8 +175,3 @@ if __name__ == '__main__':
                     image_transform = tf(image)
                     image_show = image_transform.permute(1, 2, 0)
                     col[i].image(image_show.numpy(), caption=f'origin images {i}', use_column_width='auto')
-                    
-                
-        with st.container():
-            st.subheader('Output images')
-            
