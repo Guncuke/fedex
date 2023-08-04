@@ -70,4 +70,4 @@ class Dlg:
             current_loss = closure()
             print(iters, "%.4f" % current_loss.item(), self.dummy_label.argmax().item())
 
-        return [tt(self.dummy_data[i].cpu()) for i in range(len(self.images))], self.dummy_label
+        return [tt(self.dummy_data[i].cpu()) for i in range(len(self.images))], self.dummy_label.argmax().item()

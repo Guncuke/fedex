@@ -1,10 +1,10 @@
 from controller import Controller
 import streamlit as st
 import pandas as pd
-import torch
 from torchvision import transforms
 from PIL import Image
 from dlg import Dlg
+from threading import Thread
 
 if __name__ == '__main__':
 
@@ -152,30 +152,43 @@ if __name__ == '__main__':
             st.session_state.class_result = None
 
         if 'init_images' not in st.session_state:
-            st.session_state.init_images = None
+            st.session_state.init_images = []
+
+        if 'init_classes' not in st.session_state:
+            st.session_state.init_classes = []
 
         if 'gt_images' not in st.session_state:
             st.session_state.gt_images = []
 
+        if 'gt_classes' not in st.session_state:
+            st.session_state.gt_classes = []
+
+
         def dlg_run():
+            # 点击运行之后，所有图片的初始噪声重置，真实图片赋值
+            st.session_state.init_classes = []
+            st.session_state.init_images = []
             st.session_state.gt_images = images_show
+            st.session_state.gt_classes = images_class
             st.session_state.training = True
             tdlg = Dlg(images, image_class)
             # TODO: 列表
-            gt_image.image(st.session_state.gt_images[0], use_column_width='always')
+            gt_image.image(images_show[0], use_column_width='always')
+            gt_label.subheader(f'true class: {images_class[0]}')
             for i in range(30):
                 dummy_images, dummy_labels = tdlg.run()
                 if i == 0:
-                    st.session_state.init_images = dummy_images
+                    st.session_state.init_images.append(dummy_images[0])
+                    st.session_state.init_classes.append(dummy_labels[0])
                     # TODO: 列表
                     init_image.image(dummy_images[0], use_column_width='always')
+                    init_class.subheader(f'init class :{dummy_labels[0]}')
                 for dummy_image, dummy_label in zip(dummy_images, dummy_labels):
                     placeholder_image.image(dummy_image, use_column_width='always')
-                    placeholder_text.subheader(f'The class of the image is: {dummy_label.argmax().item()}')
+                    placeholder_text.subheader(f'The class of the image is: {dummy_label}')
             st.session_state.picture_result = dummy_image
             st.session_state.class_result = dummy_label
             st.session_state.training = False
-
 
         st.subheader('Input origin images')
 
@@ -191,24 +204,31 @@ if __name__ == '__main__':
                 transforms.ToTensor(),
             ])
             images_show = []
+            images_class = []
             for i, image in enumerate(images):
                 image = Image.open(image)
                 image_transform = tf(image)
-                image_show = image_transform.permute(1, 2, 0)
-                images_show.append(image_show.numpy())
-                col[i].image(image_show.numpy(), caption=f'origin images {i}', use_column_width='auto')
-                image_class = col[i].number_input(f"image{i} class:", min_value=0, max_value=99, value=8,
+                image_show = image_transform.permute(1, 2, 0).numpy()
+                images_show.append(image_show)
+                col[i].image(image_show, caption=f'origin images {i}', use_column_width='auto')
+                image_class = col[i].number_input(f"image{i} class:", min_value=0, max_value=99, value=50,
                                                   disabled=st.session_state.training)
+                images_class.append(image_class)
 
         st.subheader('Output origin images')
         col_process = st.columns(3)
         init_image = col_process[0].empty()
+        init_class = col_process[0].empty()
         gt_image = col_process[2].empty()
+        gt_label = col_process[2].empty()
         placeholder_image = col_process[1].empty()
         placeholder_text = col_process[1].empty()
         if st.session_state.picture_result is not None:
             placeholder_image.image(st.session_state.picture_result, use_column_width='always')
-            placeholder_text.subheader(f'The class of the image is: {st.session_state.class_result.argmax().item()}')
+            placeholder_text.subheader(f'The class of the image is: {st.session_state.class_result}')
             gt_image.image(st.session_state.gt_images[0], use_column_width='always')
+            gt_label.subheader(f'true class: {st.session_state.gt_classes[0]}')
             init_image.image(st.session_state.init_images[0], use_column_width='always')
+            init_class.subheader(f'init class :{st.session_state.init_classes[0]}')
+
 
