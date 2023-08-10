@@ -172,15 +172,13 @@ if __name__ == '__main__':
             st.session_state.gt_classes = images_class
             st.session_state.training = True
             tdlg = Dlg(images, image_class)
-            # TODO: 列表
             gt_image.image(images_show[0], use_column_width='always')
             gt_label.subheader(f'true class: {images_class[0]}')
-            for i in range(30):
+            for i in range(50):
                 dummy_images, dummy_labels = tdlg.run()
                 if i == 0:
                     st.session_state.init_images.append(dummy_images[0])
                     st.session_state.init_classes.append(dummy_labels[0])
-                    # TODO: 列表
                     init_image.image(dummy_images[0], use_column_width='always')
                     init_class.subheader(f'init class :{dummy_labels[0]}')
                 for dummy_image, dummy_label in zip(dummy_images, dummy_labels):
@@ -230,5 +228,4 @@ if __name__ == '__main__':
             gt_label.subheader(f'true class: {st.session_state.gt_classes[0]}')
             init_image.image(st.session_state.init_images[0], use_column_width='always')
             init_class.subheader(f'init class :{st.session_state.init_classes[0]}')
-
 

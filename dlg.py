@@ -23,8 +23,8 @@ class Dlg:
         self.tp = transforms.ToTensor()
         self.tt = transforms.ToPILImage()
         self.device = "cpu"
-        if torch.cuda.is_available():
-            self.device = "cuda"
+        # if torch.cuda.is_available():
+        #     self.device = "cuda"
 
         self.gt_data = self.images.to(self.device)
 
@@ -48,7 +48,7 @@ class Dlg:
 
     def run(self):
         tt = transforms.ToPILImage()
-
+        before_label = self.dummy_label.clone()
         for iters in range(10):
             def closure():
                 self.optimizer.zero_grad()
@@ -68,6 +68,6 @@ class Dlg:
 
             self.optimizer.step(closure)
             current_loss = closure()
-            print(iters, "%.4f" % current_loss.item(), self.dummy_label.argmax().item())
+            # print(iters, "%.4f" % current_loss.item(), self.dummy_label.argmax().item())
 
-        return [tt(self.dummy_data[i].cpu()) for i in range(len(self.images))], self.dummy_label.argmax().item()
+        return [tt(self.dummy_data[i].cpu()) for i in range(len(self.images))], [before_label.argmax().item()]
