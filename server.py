@@ -3,7 +3,7 @@ from models import Model
 
 
 class Server(Model):
-	
+
 	def __init__(
 		self,
 		model_name: str,
@@ -35,6 +35,19 @@ class Server(Model):
 		return weight_accumulator
 
 	@staticmethod
+	def max_avg(clients_diff):
+
+		weight_accumulator = {}
+		for name, params in clients_diff[-1].items():
+			weight_accumulator[name] = torch.zeros_like(params)
+
+		for _, client_diff in enumerate(clients_diff):
+			for name, params in client_diff.items():
+				weight_accumulator[name] = torch.where(torch.abs(params) >= torch.abs(weight_accumulator[name]),
+													   weight_accumulator[name], params)
+		return weight_accumulator
+
+	@staticmethod
 	def fed_avg(clients_diff, clients_data_len):
 
 		total_len = sum(clients_data_len)
@@ -59,6 +72,8 @@ class Server(Model):
 			weight_accumulator = self.simple_avg(clients_diff)
 		elif self.aggr_rule == "FedAvg":
 			weight_accumulator = self.fed_avg(clients_diff, clients_data_len)
+		elif self.aggr_rule == "MaxAvg":
+			weight_accumulator = self.max_avg(clients_diff)
 		else:
 			pass
 
@@ -77,13 +92,13 @@ class Server(Model):
 		dataset_size = 0
 
 		for batch_id, batch in enumerate(self.eval_loader):
-			data, target = batch 
+			data, target = batch
 			dataset_size += data.size()[0]
-			
+
 			if torch.cuda.is_available():
 				data = data.cuda()
 				target = target.cuda()
-				
+
 			output = self.global_model(data)
 			loss += torch.nn.functional.cross_entropy(output, target, reduction='sum').item()
 			pred = output.data.max(1)[1]

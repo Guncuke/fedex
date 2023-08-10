@@ -44,7 +44,7 @@ class Controller(object):
             subset_indices = distribution.split_iid(num_client, len(train_datasets))
 
         # self.data_distribution : to draw the data distribution graph
-        n_classes = train_datasets.targets.max()+1
+        n_classes = max(train_datasets.targets)+1
         self.data_distribute = [[0]*n_classes for i in range(num_client)]
         for i, indices in enumerate(subset_indices):
             for j in indices:

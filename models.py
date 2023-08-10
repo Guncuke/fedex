@@ -26,7 +26,7 @@ class Model:
                                       bias=False)
 
         # 2. change the fc layer by out feature
-        num_labels = dataset.targets.max()+1
+        num_labels = max(dataset.targets)+1
         num_ftrs = model.fc.in_features
         model.fc = nn.Linear(num_ftrs, num_labels)
 

@@ -3,7 +3,8 @@ from torch.distributions.dirichlet import Dirichlet
 
 
 def dirichlet_split_noniid(train_labels, alpha, n_clients):
-    n_classes = train_labels.max() + 1
+    train_labels = torch.tensor(train_labels)
+    n_classes = max(train_labels) + 1
     label_distribution = Dirichlet(torch.full((n_clients,), alpha)).sample((n_classes,))
     # 1. Get the index of each label
     class_idcs = [torch.nonzero(train_labels == y).flatten()
