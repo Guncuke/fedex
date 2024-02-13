@@ -122,6 +122,7 @@ if __name__ == '__main__':
             st.session_state.training = False
             st.experimental_rerun()
 
+
     if st.session_state.button_click:
         tab5, tab6, tab7 = st.tabs(["accuracy", "loss", "data distribution"])
         with tab5:

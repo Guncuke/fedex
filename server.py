@@ -1,68 +1,30 @@
 import torch
 from models import Model
+from aggregation import *
 
 
 class Server(Model):
 
+	_instance = None
+
+	def __new__(cls, *args, **kwargs):
+		if not cls._instance:
+			cls._instance = super(Server, cls).__new__(cls)
+		return cls._instance
+
 	def __init__(
-		self,
-		model_name: str,
-		batch_size: int,
-		eval_dataset,
-		aggr_rule: str
-	):
+        self,
+        model_name: str,
+        batch_size: int,
+        eval_dataset,
+        aggr_rule: str
+    ):
 		super().__init__(model_name, eval_dataset)
 		self.aggr_rule = aggr_rule
 		self.global_model = self.model
 		self.eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=batch_size, shuffle=True)
 
-	@staticmethod
-	def simple_avg(clients_diff):
-		"""
-		all clients have the same weight
-		:param clients_diff: all clients' gradient
-		:return: value add to global model
-		"""
-		clients_num = len(clients_diff)
-		weight_accumulator = {}
-		for name, params in clients_diff[-1].items():
-			weight_accumulator[name] = torch.zeros_like(params)
-
-		for _, client_diff in enumerate(clients_diff):
-			for name, params in client_diff.items():
-				weight_accumulator[name].add_(params/clients_num)
-
-		return weight_accumulator
-
-	@staticmethod
-	def max_avg(clients_diff):
-
-		weight_accumulator = {}
-		for name, params in clients_diff[-1].items():
-			weight_accumulator[name] = torch.zeros_like(params)
-
-		for _, client_diff in enumerate(clients_diff):
-			for name, params in client_diff.items():
-				weight_accumulator[name] = torch.where(torch.abs(params) >= torch.abs(weight_accumulator[name]),
-													   weight_accumulator[name], params)
-		return weight_accumulator
-
-	@staticmethod
-	def fed_avg(clients_diff, clients_data_len):
-
-		total_len = sum(clients_data_len)
-
-		weight_accumulator = {}
-		for name, params in clients_diff[0].items():
-			weight_accumulator[name] = torch.zeros_like(params)
-
-		for i, client_diff in enumerate(clients_diff):
-			for name, params in client_diff.items():
-				# this may be change type from Int to Float
-				# only state_dict() ALL MODEL DATA
-				weight_accumulator[name] = weight_accumulator[name] + (params * clients_data_len[i] / total_len)
-
-		return weight_accumulator
+	
 
 	def model_update(self, clients_diff, clients_data_len):
 
