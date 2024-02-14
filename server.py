@@ -1,9 +1,9 @@
 import torch
-from models import Model
+from models import ModelFactory
 from aggregation import *
 
 
-class Server(Model):
+class Server():
 
 	_instance = None
 
@@ -19,28 +19,23 @@ class Server(Model):
         eval_dataset,
         aggr_rule: str
     ):
-		super().__init__(model_name, eval_dataset)
-		self.aggr_rule = aggr_rule
-		self.global_model = self.model
+
+		if aggr_rule == "SimpleAvg":
+			self.aggr_rule = SimpleAverageStrategy()
+		elif aggr_rule == "FedAvg":
+			self.aggr_rule = FedAverageStrategy()
+		elif aggr_rule == "MaxAvg":
+			self.aggr_rule = MaxAverageStrategy()
+
+		self.global_model = ModelFactory.create_model(model_name, eval_dataset)
 		self.eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=batch_size, shuffle=True)
 
-	
 
 	def model_update(self, clients_diff, clients_data_len):
-
-		weight_accumulator = self.simple_avg(clients_diff)
-
-		if self.aggr_rule == "SimpleAbg":
-			weight_accumulator = self.simple_avg(clients_diff)
-		elif self.aggr_rule == "FedAvg":
-			weight_accumulator = self.fed_avg(clients_diff, clients_data_len)
-		elif self.aggr_rule == "MaxAvg":
-			weight_accumulator = self.max_avg(clients_diff)
-		else:
-			pass
+		
+		weight_accumulator = self.aggr_rule.aggregate(clients_diff, clients_data_len)
 
 		for name, params in weight_accumulator.items():
-
 			# Only use state_dict(), the model has Int type
 			if self.global_model.state_dict()[name].dtype != weight_accumulator[name].dtype:
 				self.global_model.state_dict()[name] += weight_accumulator[name].to(self.global_model.state_dict()[name].dtype)

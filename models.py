@@ -3,9 +3,9 @@ from torchvision import models
 import torch.nn as nn
 
 
-class Model:
-
-    def __init__(self, name, dataset):
+class ModelFactory:
+    @staticmethod
+    def create_model(name, dataset):
         model = None
 
         # add yourself model here
@@ -31,6 +31,8 @@ class Model:
         model.fc = nn.Linear(num_ftrs, num_labels)
 
         if torch.cuda.is_available():
-            self.model = model.cuda()
+            model = model.cuda()
         else:
-            self.model = model
+            model = model
+        
+        return model

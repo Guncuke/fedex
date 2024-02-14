@@ -2,7 +2,7 @@ import torch
 from torch.utils.data import Subset
 from server import Server
 from client import Client
-import datasets
+from datasets import DatasetFactory
 import random
 from utils import distribution
 from typing import Optional
@@ -24,7 +24,7 @@ class Controller(object):
                  aggr_rule: str
                  ):
 
-        train_datasets, eval_datasets = datasets.get_dataset("./data/", dataset)
+        train_datasets, eval_datasets = DatasetFactory.get_dataset("./data/", dataset)
         self.server = Server(batch_size=batch_size,
                              model_name=model_name,
                              eval_dataset=eval_datasets,

@@ -2,12 +2,12 @@ import torch
 
 
 class AggregationStrategy:
-    def aggregate(self, data):
+    def aggregate(self, clients_diff, clients_data_len):
         raise NotImplementedError()
 
 
 class SimpleAverageStrategy(AggregationStrategy):
-    def aggregate(clients_diff):
+    def aggregate(self, clients_diff, clients_data_len):
         clients_num = len(clients_diff)
         weight_accumulator = {}
         for name, params in clients_diff[-1].items():
@@ -21,7 +21,7 @@ class SimpleAverageStrategy(AggregationStrategy):
 
 
 class FedAverageStrategy(AggregationStrategy):
-    def aggregate(clients_diff, clients_data_len):
+    def aggregate(self, clients_diff, clients_data_len):
 
         total_len = sum(clients_data_len)
 
@@ -37,7 +37,7 @@ class FedAverageStrategy(AggregationStrategy):
 
 
 class MaxAverageStrategy(AggregationStrategy):
-    def aggregate(clients_diff):
+    def aggregate(self, clients_diff, clients_data_len):
 
         weight_accumulator = {}
         for name, params in clients_diff[-1].items():
