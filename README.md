@@ -2,7 +2,8 @@
  a simple federate-learning framework write by python
 ![fedex](https://github.com/Guncuke/fedex/assets/78009909/cc66a1d8-837c-4e3e-93d0-bb4c14c24caf)
 
-streamlit run Controller.py
+How to run?
+> streamlit run main.py
 
 ## 1. Client
 
